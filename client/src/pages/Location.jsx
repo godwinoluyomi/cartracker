@@ -4,30 +4,6 @@ import axios from 'axios';
 
 const Location = () => {
 
-    const getPathData = () => {
-        axios
-            .get("https://vestgas.com/airforce/output.php", {
-                params: {
-                    api_key: "632151225g!$",
-                },
-            })
-            .then(function (response) {
-                console.log(response.data);
-            })
-            .catch(function (error) {
-                console.log(error);
-            })
-            .finally(function () {
-                // always executed
-            });
-    }
-
-    useEffect(() => {
-        getPathData();
-
-
-    }, []);
-
     // console.log(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
     // console.log(getPathData());
 
