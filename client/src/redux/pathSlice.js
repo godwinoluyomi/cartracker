@@ -12,7 +12,7 @@ export const fetchAllPath = createAsyncThunk(
         params: {},
       });
 
-      //   console.log(response.data);
+      console.log(response.data);
 
       return response.data;
     } catch (error) {
@@ -32,7 +32,7 @@ export const fetchSinglePath = createAsyncThunk(
         params: {},
       });
 
-      //   console.log(response.data);
+      console.log(response.data);
 
       return response.data;
     } catch (error) {
