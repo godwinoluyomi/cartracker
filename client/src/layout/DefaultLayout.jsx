@@ -9,7 +9,7 @@ const DefaultLayout = () => {
             <NavBar />
 
             <Row>
-                <Col xs={{ span: 24 }} sm={{ span: 22, offset: 1 }} md={{ span: 22, offset: 1 }} lg={{ span: 20, offset: 2 }} xl={{ span: 20, offset: 2 }}>
+                <Col xs={{ span: 24 }} sm={{ span: 24 }} md={{ span: 22, offset: 1 }} lg={{ span: 20, offset: 2 }} xl={{ span: 20, offset: 2 }}>
                     <Outlet />
                 </Col>
             </Row>
