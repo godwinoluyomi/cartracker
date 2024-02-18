@@ -12,7 +12,7 @@ const NavBar = () => {
                 backgroundColor: 'black'
             }}
         >
-            <Link to={'/'}><img src='../images/logowhite.png' className='logoAdjust ' /></Link>
+            <img src='../images/logowhite.png' className=' h-2/3 w-auto' />
         </Header>
     )
 }
