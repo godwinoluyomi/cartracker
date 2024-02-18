@@ -8,7 +8,7 @@ const { Meta } = Card;
 const VehicleCard = ({ vehicle_id }) => {
     return (
         <>
-            <Col xs={{ span: 24 }} sm={{ span: 12 }} md={{ span: 8 }} lg={{ span: 8 }} xl={{ span: 8 }}>
+            <Col xs={{ span: 12 }} sm={{ span: 12 }} md={{ span: 8 }} lg={{ span: 6 }} xl={{ span: 6 }}>
                 <Card
                     bordered={false}
                     cover={

@@ -9,11 +9,11 @@ const { Meta } = Card;
 const Vehicles = () => {
 
     const dispatch = useDispatch();
-    const vehiclePaths = useSelector(selectVehiclePaths);
+    const vehiclesPaths = useSelector(selectVehiclePaths);
 
-    const vehicleIds = [...new Set(vehiclePaths.map(item => item.vehicle_id))];
+    const vehicleIds = [...new Set(vehiclesPaths.map(item => item.vehicle_id))];
 
-    console.log(vehicleIds);
+    // console.log(vehicleIds);
 
     useEffect(() => {
         dispatch(fetchAllPath());
@@ -21,15 +21,10 @@ const Vehicles = () => {
 
     return (
         <>
-            <Row className=' mt-10'>
-                <Col xs={{ span: 22, offset: 1 }} sm={{ span: 20, offset: 2 }} md={{ span: 16, offset: 4 }} lg={{ span: 16, offset: 4 }} xl={{ span: 16, offset: 4 }}>
+            <Row gutter={16} className=' mt-10'>
 
-                    <Row gutter={16}>
+                {vehicleIds.map(vehicleId => (<VehicleCard key={vehicleId} vehicle_id={vehicleId} />))}
 
-                        {vehicleIds.map(vehicleId => (<VehicleCard key={vehicleId} vehicle_id={vehicleId} />))}
-
-                    </Row>
-                </Col>
             </Row>
         </>
     )

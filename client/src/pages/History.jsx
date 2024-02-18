@@ -1,52 +1,63 @@
 import React from 'react'
-import { Divider, List, Typography, Button } from 'antd';
-import { Link } from 'react-router-dom';
+import { Avatar, List, Skeleton, Button } from 'antd';
+import { Link, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleDoubleLeft, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
-
-const data = [
-    'Racing car sprays burning fuel into crowd.',
-    'Japanese princess to wed commoner.',
-    'Australian walks 100km after outback crash.',
-    'Man charged over missing wedding girl.',
-    'Los Angeles battles huge wildfires.',
-];
+import { faAngleDoubleLeft, faAngleLeft, faMapMarked } from '@fortawesome/free-solid-svg-icons';
+import { fetchAllPath, selectVehiclePaths } from '../redux/pathSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const History = () => {
+
+    const dispatch = useDispatch();
+    const vehiclePaths = useSelector(selectVehiclePaths);
+    const { vehicleId } = useParams();
+
+    const uniqueDates = [...new Set(vehiclePaths.map(item => item.created_at.split(' ')[0]))];
+    // Format dates into the desired format
+    const dateList = uniqueDates.map(date => {
+        const [year, month, day] = date.split('-');
+        const formattedDate = new Date(`${year}-${month}-${day}`).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' });
+
+        // Count occurrences of the current date in vehiclePaths
+        const waypointCount = vehiclePaths.filter(item => item.created_at.split(' ')[0] === date).length;
+
+        return {
+            link: date,
+            label: formattedDate,
+            counts: waypointCount,
+        };
+    }).sort((a, b) => new Date(b.link) - new Date(a.link));
+
+    // console.log(dateList);
+    // console.log('vehicle ID:', vehicleId);
+
     return (
         <>
-            <Link to={'/'}> <Button className=' bg-gray-900 text-white mb-10'><FontAwesomeIcon icon={faAngleLeft} className='mr-2' /> Back </Button></Link>
+            <Link to={'/'}> <Button className=' bg-gray-900 text-white mt-3 mb-5'><FontAwesomeIcon icon={faAngleLeft} className='mr-2' /> Back </Button></Link>
 
             <List
-                className="demo-loadmore-list"
-                loading={initLoading}
+                size="small"
+                header={<div className=' font-bold text-lg'>RSH 222 XS</div>}
                 itemLayout="horizontal"
-                loadMore={loadMore}
-                dataSource={list}
+                bordered={true}
+                dataSource={dateList}
+
                 renderItem={(item) => (
                     <List.Item
-                        actions={[<a key="list-loadmore-edit">edit</a>, <a key="list-loadmore-more">more</a>]}
+                        actions={[
+                            <Link to={`/vehicle/${vehicleId}/${item.link}`}><Button size='small' className=' bg-gray-600 text-white'> <FontAwesomeIcon icon={faMapMarked} className='mr-2' /> Routes </Button></Link>,
+                            // <a key="list-loadmore-more"> Estimated Fuel </a>
+                        ]}
                     >
-                        <Skeleton avatar title={false} loading={item.loading} active>
-                            <List.Item.Meta
-                                avatar={<Avatar src={item.picture.large} />}
-                                title={<a href="https://ant.design">{item.name?.last}</a>}
-                                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            />
-                            <div>content</div>
-                        </Skeleton>
+                        <List.Item.Meta
+                            title={item.label}
+                        // description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                        />
+                        <div>Waypoints: {item.counts} </div>
                     </List.Item>
                 )}
             />
 
-            <List
-                size="small"
-                header={<div>Header</div>}
-                footer={<div>Footer</div>}
-                bordered
-                dataSource={data}
-                renderItem={(item) => <List.Item>{item}</List.Item>}
-            />
         </>
     )
 }

@@ -2,12 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Col, Row, Breadcrumb, Layout, Menu, Button, theme } from 'antd';
 import { fetchSinglePath, selectVehiclePaths } from '../redux/pathSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAlignLeft, faAlignRight, faCalendarDay, faEllipsis, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faAlignLeft, faAlignRight, faCalendarDay, faEllipsis, faMinus, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { APIProvider, Map, Marker, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 
 const { Header, Content, Footer, Sider } = Layout;
+
+
+const formatDate = (dateString) => {
+    const dateParts = dateString.split('-');
+    const year = dateParts[0].slice(-2); // Extract last two digits of the year
+    const month = new Date(`${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`).toLocaleDateString('en-GB', { month: 'short' });
+    const day = parseInt(dateParts[2], 10); // Convert day to integer to remove leading zero
+
+    return `${day} ${month} ${year}`;
+};
 
 /* const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
     const key = String(index + 1);
@@ -27,43 +37,29 @@ const { Header, Content, Footer, Sider } = Layout;
 
 
 const VehicleRoutes = () => {
-    const position = { lat: 9.059657, lng: 7.403067 };
-
-    const [collapsed, setCollapsed] = useState(false);
-    const [current, setCurrent] = useState();
 
     const dispatch = useDispatch();
-    const { vehicleId } = useParams();
+    const { vehicleId, pathDate } = useParams();
     const vehiclePaths = useSelector(selectVehiclePaths);
 
-    // Step 1: Extract dates and remove duplicates
-    const uniqueDates = [...new Set(vehiclePaths.map(item => item.created_at.split(' ')[0]))];
+    // Filter with selected dates
+    const vehiclePathsDate = vehiclePaths.filter(item => item.created_at.includes(pathDate));
 
-    // Step 2: Format dates into the desired format
-    const formattedDates = uniqueDates.map(date => {
-        const [year, month, day] = date.split('-');
-        const formattedDate = new Date(`${year}-${month}-${day}`).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' });
-
-        return {
-            key: date,
-            label: formattedDate,
-            // icon: <FontAwesomeIcon icon={faMinus} />,
-        };
-    }).sort((a, b) => new Date(b.key) - new Date(a.key));
-
-    // Menu Click Events
-    const handleClickMenu = (e) => {
-        const menuItem = e.key;
-        setCurrent(menuItem);
-        // console.log('click ', e);
+    // Remove objects with the same longitude and latitude as the one before it i.e parked car
+    for (let i = 1; i < vehiclePathsDate.length; i++) {
+        // Compare longitude and latitude with the previous object
+        if (
+            vehiclePathsDate[i].latitude === vehiclePathsDate[i - 1].latitude &&
+            vehiclePathsDate[i].longitude === vehiclePathsDate[i - 1].longitude
+            // || vehiclePathsDate[i].speed == 0
+        ) {
+            // Remove the current object if longitude and latitude match the previous one
+            vehiclePathsDate.splice(i, 1);
+            // Decrement the index to account for the removed object
+            i--;
+        }
     }
 
-    useEffect(() => {
-        dispatch(fetchSinglePath({ vehicleId }));
-    }, []);
-
-    // Filter with selected dates
-    const vehiclePathsDate = vehiclePaths.filter(item => item.created_at.includes(current));
 
     // Build waypoint object from vahiclepathdate
     const waypoints = vehiclePathsDate.map(item => ({
@@ -74,69 +70,43 @@ const VehicleRoutes = () => {
         stopover: false
     }));
 
-    // console.log(waypoints);
-    // console.log(vehiclePathsDate);
+    const defaultPosition = waypoints[0].location;
 
-    // console.log(formattedDates);
+    useEffect(() => {
+        dispatch(fetchSinglePath({ vehicleId }));
+    }, []);
+
+    console.log(vehiclePathsDate);
+    // console.log(waypoints);
+    // console.log(pathDate, vehicleId, defaultPosition);
 
     return (
         <>
             <Layout
                 style={{
-                    padding: '24px 0',
                     background: '#fff',
                     borderRadius: '3px',
                 }}
+
+                className='mt-3 mb-10'
             >
-                <Sider trigger={null} collapsible collapsed={collapsed}
-                    style={{
-                        background: '#e6e6e6',
-                        overflow: 'auto',
-                        // height: '100vh',
-                        position: 'fixed',
-                        left: 0,
-                        // top: 70,
-                        bottom: 0,
-                    }}
-                    width={200}
-                >
-                    <Menu
-                        mode="inline"
-                        defaultSelectedKeys={current}
-                        defaultOpenKeys={['sub1']}
-                        onClick={handleClickMenu}
-                        style={{
-                            height: '100%',
-                        }}
-                        items={formattedDates}
-                    />
-                </Sider>
-                <Button
-                    type="text"
-                    icon={collapsed ? <FontAwesomeIcon icon={faAlignRight} /> : <FontAwesomeIcon icon={faAlignLeft} />}
-                    onClick={() => setCollapsed(!collapsed)}
-                    style={{
-                        fontSize: '16px',
-                        width: 70,
-                        height: 45,
-                        position: 'fixed',
-                        left: 6,
-                        top: 70,
-                        // bottom: 0,
-                    }}
-                />
+                <div className=' flex mb-5'>
+                    <Link to={`/history/${vehicleId}`}> <Button className=' bg-gray-900 text-white mr-10'><FontAwesomeIcon icon={faAngleLeft} className='mr-2' /> Back </Button></Link>
+                    <div className=' text-lg mr-10'> Number Plate: <span className=' font-bold'> RSH 222 XS </span> </div>
+                    <div className=' text-lg mr-10'>Date: <span className=' font-bold'> {formatDate(pathDate)}  </span></div>
+                </div>
                 <Content
                     style={{
-                        padding: '0 24px',
+                        // padding: '0 24px',
                         minHeight: 280,
                     }}
                 >
 
                     <div style={{ height: "90vh", width: "100%" }}>
                         <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-                            <Map defaultZoom={15} defaultCenter={position} mapId={import.meta.env.VITE_GOOGLE_MAPS_MAP_ID} fullscreenControl={false}>
-
-                                {current ? <Directions waypointsProp={waypoints} /> : <Marker position={position} />}
+                            <Map defaultZoom={15} defaultCenter={defaultPosition} mapId={import.meta.env.VITE_GOOGLE_MAPS_MAP_ID} fullscreenControl={false}>
+                                {/* <Marker position={defaultPosition} /> */}
+                                <Directions waypointsProp={waypoints} />
 
                             </Map>
                         </APIProvider>
@@ -172,8 +142,7 @@ function Directions({ waypointsProp }) {
         waypointsPropSlim = waypointsProp.filter((_, index) => index % spacing === 0).slice(0, 22);
     }
 
-    console.log(waypointsPropSlim);
-    console.log(startPoint);
+    // console.log(waypointsPropSlim);
 
     const map = useMap();
     const routesLibrary = useMapsLibrary("routes");
@@ -181,32 +150,13 @@ function Directions({ waypointsProp }) {
     const [directionsRenderer, setDirectionsRenderer] = useState();
     const [routes, setRoutes] = useState([]);
 
-    const waypts = [
-        { location: { lat: 9.064525, lng: 7.472856 }, stopover: false, },
-        { location: { lat: 9.064636, lng: 7.472753 }, stopover: false, },
-        { location: { lat: 9.064661, lng: 7.472709 }, stopover: false, },
-        { location: { lat: 9.064632, lng: 7.472780 }, stopover: false, },
-        { location: { lat: 9.064642, lng: 7.472791 }, stopover: false, },
-        { location: { lat: 9.064523, lng: 7.472766 }, stopover: false, },
-        { location: { lat: 9.065321, lng: 7.474026 }, stopover: false, },
-        { location: { lat: 9.067711, lng: 7.475718 }, stopover: false, },
-        { location: { lat: 9.074468, lng: 7.476243 }, stopover: false, },
-        { location: { lat: 9.076224, lng: 7.475013 }, stopover: false, },
-        { location: { lat: 9.077507, lng: 7.472563 }, stopover: false, },
-        { location: { lat: 9.079063, lng: 7.469913 }, stopover: false, },
-        { location: { lat: 9.081321, lng: 7.466562 }, stopover: false, },
-        { location: { lat: 9.084172, lng: 7.461789 }, stopover: false, },
-        { location: { lat: 9.065038, lng: 7.394791 }, stopover: false, },
-    ];
-    // console.log(waypts);
-
     useEffect(() => {
         if (!routesLibrary || !map) return;
 
         setDirectionsService(new routesLibrary.DirectionsService());
         setDirectionsRenderer(new routesLibrary.DirectionsRenderer({ map }));
 
-    }, [routesLibrary, map, waypointsProp]);
+    }, [routesLibrary, map]);
 
     useEffect(() => {
         if (!directionsService || !directionsRenderer) return;
@@ -216,13 +166,13 @@ function Directions({ waypointsProp }) {
             destination: endPoint ? startPoint : { lat: 9.064525, lng: 7.472856 },
             waypoints: waypointsPropSlim,
             travelMode: google.maps.TravelMode.DRIVING,
-            provideRouteAlternatives: true,
+            // provideRouteAlternatives: true,
         }).then(response => {
             directionsRenderer.setDirections(response);
             setRoutes(response.routes);
         });
 
-    }, [directionsService, directionsRenderer, waypointsProp]);
+    }, [directionsService, directionsRenderer]);
 
     return null;
 }

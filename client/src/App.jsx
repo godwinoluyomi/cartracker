@@ -17,7 +17,7 @@ function App() {
         <Route path='/' element={<DefaultLayout />} >
           <Route index element={<Vehicles />} />
           <Route path='/routes' element={<MapRoutes />} />
-          <Route path='/vehicle/:vehicleId' element={<VehicleRoutes />} />
+          <Route path='/vehicle/:vehicleId/:pathDate' element={<VehicleRoutes />} />
           <Route path='/history/:vehicleId' element={<History />} />
           <Route path='/details/:vehicleId' element={<Details />} />
 

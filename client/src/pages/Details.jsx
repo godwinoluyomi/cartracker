@@ -74,12 +74,10 @@ const Location = ({ vehicle_id }) => {
 
     return (
         <>
-            <Row className=' mt-3'>
-                <Col xs={{ span: 22, offset: 1 }} sm={{ span: 20, offset: 2 }} md={{ span: 16, offset: 4 }} lg={{ span: 16, offset: 4 }} xl={{ span: 16, offset: 4 }}>
-                    <Link to={'/'}> <Button className=' bg-gray-900 text-white mb-10'><FontAwesomeIcon icon={faAngleLeft} className='mr-2' /> Back </Button></Link>
-                    <Descriptions title="RSH 222 XS" bordered items={items} />
-                </Col>
-            </Row>
+            <div className=' mt-3'>
+                <Link to={'/'}> <Button className=' bg-gray-900 text-white mb-5'><FontAwesomeIcon icon={faAngleLeft} className='mr-2' /> Back </Button></Link>
+                <Descriptions title="RSH 222 XS" bordered items={items} />
+            </div>
         </>
     )
 }
